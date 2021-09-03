@@ -31,7 +31,13 @@ public class QueueRoutes  extends AllDirectives{
                                 get(() ->
                                         parameter(StringUnmarshallers.STRING, "id", id -> {
                                             // Forward GET request to EntryPointActor::GetLocation
-                                            CompletionStage<EntryPointMessage.GetLocation> location = ask(system, (ActorRef<LocationMessage> replyTo) -> new EntryPointMessage.GetLocation(replyTo, id), Duration.ofSeconds(5), system.scheduler());
+                                            CompletionStage<LocationMessage> location =
+                                                    ask(
+                                                            system,
+                                                            (ActorRef<LocationMessage> replyTo) -> new EntryPointMessage.GetLocation(replyTo, id),
+                                                            Duration.ofSeconds(5),
+                                                            system.scheduler()
+                                                    );
                                             return completeOKWithFuture(location, Jackson.marshaller());
                                         })
                                 ),
