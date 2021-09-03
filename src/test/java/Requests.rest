@@ -1,0 +1,17 @@
+:base = http://localhost:3080
+
+
+# POST :base/location
+# Content-Type: application/json
+
+# {
+# 	"name": "lol"
+# }
+
+
+# GET :base/location
+
+GET :base/location?id=1c1a35fa-3ae2-4c94-a78e-79fa7c9279a1
+
+
+
