@@ -1,6 +1,5 @@
 package actors;
 
-import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
@@ -9,7 +8,6 @@ import akka.actor.typed.javadsl.Receive;
 import models.base.Location;
 import models.message.EntryPointMessage;
 import models.message.LocationMessage;
-import models.message.Message;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -35,10 +33,14 @@ public class EntrypointActor extends AbstractBehavior<EntryPointMessage> {
     }
 
     public Behavior<EntryPointMessage> onAddLocation(EntryPointMessage.AddLocation location) {
-        // Create new EntryPoint
-        Location result = new Location(UUID.fromString(location.name).toString(), location.name);
-        result.ref = this.getContext().spawn(LocationActor.create(result), result.name);
+        // Create Location
+        Location result = new Location(UUID.randomUUID().toString(), location.name);
+        // Start Actor for Location
+        result.ref = this.getContext().spawn(LocationActor.create(result), result.id);
+        // Add Actor to list
         this.locations.add(result);
+        // Reply with Location obj
+        location.replyTo.tell(result);
         return this;
     }
 
@@ -60,10 +62,6 @@ public class EntrypointActor extends AbstractBehavior<EntryPointMessage> {
             location.replyTo.tell(new LocationMessage.Error("Couldn't find"));
         }
 
-        return this;
-    }
-
-    public Behavior<EntryPointMessage> onLocationMessage (LocationMessage message) {
         return this;
     }
 }

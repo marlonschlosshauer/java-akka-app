@@ -1,6 +1,5 @@
 import actors.LocationActor;
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.ActorSystem;
+import akka.actor.typed.ActorRef; import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.http.javadsl.marshallers.jackson.Jackson;
 import akka.http.javadsl.server.Route;
@@ -48,9 +47,16 @@ public class QueueRoutes  extends AllDirectives{
                                 ),
                                 post(() ->
                                         entity(Jackson.unmarshaller(Location.class), location -> {
-                                            location.id = UUID.fromString(location.name).toString();
-                                            system.systemActorOf(LocationActor.create(location), location.id, system.systemActorOf$default$3());
-                                            return complete(String.format("Successfully added Location with id %s",location.id));
+                                            CompletionStage<LocationMessage> l =
+                                                    ask(
+                                                            system,
+                                                            (ActorRef<LocationMessage> replyTo) -> new EntryPointMessage.AddLocation(replyTo, location),
+                                                            Duration.ofSeconds(5),
+                                                            system.scheduler()
+                                                    );
+
+                                            return completeOKWithFuture(l, Jackson.marshaller());
+                                            //return complete(String.format("Successfully added Location with id %s","22"));
                                         })
                                 )
                         )
