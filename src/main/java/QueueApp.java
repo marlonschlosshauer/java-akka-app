@@ -12,8 +12,7 @@ import java.util.concurrent.CompletionStage;
 public class QueueApp {
     public static void main(String[] args) throws IOException {
         // Setup actors
-        var system = ActorSystem.create(EchoActor.create(), "Main");
-        //var echo = system.systemActorOf(EchoActor.create(), "EchoActor", system.systemActorOf$default$3());
+        var system = ActorSystem.create(EntrypointActor.create(), "Main");
 
         // Setup REST API
         final Http http = Http.get(system);
