@@ -43,18 +43,20 @@ public class EntrypointActor extends AbstractBehavior<EntryPointMessage> {
     }
 
     public Behavior<EntryPointMessage> onGetLocation(EntryPointMessage.GetLocation location) {
-        // Find location
         Location result = null;
+
+        // Find location
         for(Location l : this.locations) {
-            if (l.id == location.id) result = l;
+            if (l.id.equals(location.id)) {
+                result = l;
+                break;
+            }
         }
 
         // Send reply to request
         if (result != null) {
             location.replyTo.tell(result);
         } else {
-            // TODO: Make LocationMessage thats Empty
-            //location.replyTo.tell(new Location());
             location.replyTo.tell(new LocationMessage.Error("Couldn't find"));
         }
 
