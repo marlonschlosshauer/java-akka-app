@@ -1,32 +1,37 @@
 import actors.EchoActor;
 import actors.EntrypointActor;
 import actors.MainActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.typed.ActorSystem;
+import akka.actor.typed.javadsl.AskPattern;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.ServerBinding;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import models.message.EchoMessage;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletionStage;
 
 public class QueueApp {
     public static void main(String[] args) throws IOException {
-        // Setup actors
-        var system = ActorSystem.create(EntrypointActor.create(), "Main");
+        var system = ActorSystem.create(EchoActor.create(), "Main");
+        var echo = system.systemActorOf(EchoActor.create(), "Lol", system.systemActorOf$default$3());
+        echo.tell(new EchoMessage.Echo("Hello from Akka"));
 
-        // Setup REST API
-        final Http http = Http.get(system);
-        QueueRoutes route = new QueueRoutes(system);
+        CompletionStage<EchoMessage> response = AskPattern.ask(
+                echo,
+                replyTo -> new EchoMessage.Reply(replyTo),
+                Duration.ofSeconds(3),
+                system.scheduler());
 
-        final CompletionStage<ServerBinding> binding = http.newServerAt("localhost", 3080)
-                .bind(route.createRoutes());
+        response.whenComplete((reply, failure) -> System.out.println("Message: " + ((EchoMessage.Echo) reply).message));
 
-        System.out.println("Server online at http://localhost:3080/\nPress RETURN to stop...");
-        System.in.read(); // let it run until user presses return
-
-        binding
-                .thenCompose(ServerBinding::unbind) // trigger unbinding from the port
-                .thenAccept(unbound -> system.terminate()); // and shutdown when done
+        echo.tell(new EchoMessage.Echo("Hello from Akka"));
+        echo.tell(new EchoMessage.Stop());
+        echo.tell(new EchoMessage.Echo("This should not be printed"));
 
     }
 }
