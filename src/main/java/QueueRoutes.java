@@ -56,7 +56,6 @@ public class QueueRoutes  extends AllDirectives{
                                                     );
 
                                             return completeOKWithFuture(l, Jackson.marshaller());
-                                            //return complete(String.format("Successfully added Location with id %s","22"));
                                         })
                                 )
                         )
