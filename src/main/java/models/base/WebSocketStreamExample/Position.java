@@ -8,4 +8,12 @@ public class Position {
         this.lat = lat;
         this.lng = lng;
     }
+
+    @Override
+    public String toString() {
+        return "Position{" +
+                "lat=" + lat +
+                ", lng=" + lng +
+                '}';
+    }
 }

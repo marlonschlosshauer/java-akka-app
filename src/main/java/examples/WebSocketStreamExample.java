@@ -21,11 +21,7 @@ import java.util.concurrent.CompletionStage;
 import static akka.http.javadsl.server.Directives.*;
 
 public class WebSocketStreamExample {
-    public static void run() {
-        final ActorSystem system = ActorSystem.create();
-        final Materializer materializer = ActorMaterializer.create(system);
-        final ConnectHttp host = ConnectHttp.toHost("127.0.0.1", 8080);
-        final Http http = Http.get(system);
+    private static Flow<Message, Message, NotUsed> stream (ActorSystem system) {
         final Gson translator = new Gson();
 
         Flow<Update, Update, NotUsed> log = Flow.of(Update.class).map(x -> {
@@ -46,11 +42,21 @@ public class WebSocketStreamExample {
             return result;
         });
 
-        Flow<Message, Message, NotUsed> handle = cast
+        Flow<Update, Update, NotUsed> reportIncident = Flow.of(Update.class).map(u -> u);
+
+        return Flow.of(Message.class)
+                .via(cast)
                 .via(log)
                 .map(u -> TextMessage.create("Successfully added update"));
+    }
 
-        final Route route = path("log", () -> get(() -> handleWebSocketMessages(handle)));
+    public static void run() {
+        final ActorSystem system = ActorSystem.create();
+        final Materializer materializer = ActorMaterializer.create(system);
+        final ConnectHttp host = ConnectHttp.toHost("127.0.0.1", 8080);
+        final Http http = Http.get(system);
+
+        final Route route = path("log", () -> get(() -> handleWebSocketMessages(stream(system))));
 
         final CompletionStage<ServerBinding> bindingCompletionStage = http.bindAndHandle(route.flow(system, materializer), host, materializer);
 
