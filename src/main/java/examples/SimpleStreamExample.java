@@ -63,9 +63,8 @@ public class SimpleStreamExample {
         });
 
         //CompletionStage<Response> test =  Futures.successful(new Response(true));
-        CompletionStage<Response> insert = (CompletionStage<Response>) Futures.successful(new Response(true));
-
-        Flow.of(String.class).mapAsync(1,x -> insert );
+        //CompletionStage<Response> insert = (CompletionStage<Response>) Futures.successful(new Response(true));
+        //Flow.of(String.class).mapAsync(1,x -> insert );
 
         /*
         combine Message
@@ -87,6 +86,11 @@ public class SimpleStreamExample {
                 .via(sum)
                 .via(unnecessary)
                 .runWith(Sink.ignore(), system);
+
+        final Source<Integer, NotUsed> s1 = Source.range(1, 100);
+        final Source<Integer, NotUsed> s2 = Source.range(100, 0);
+
+        s1.zipWith(s2, (x,y) -> x + ":" + y).take(50).runForeach(s -> System.out.println(s), system);
 
         System.in.read();
         system.terminate();

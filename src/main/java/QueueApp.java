@@ -1,8 +1,8 @@
-import examples.SimpleStreamExample;
-import examples.StreamExample;
+import examples.ActorStreamInteropExample;
+import examples.SimpleStreamMeasurementExample;
 
 public class QueueApp {
     public static void main(String[] args) throws Exception {
-        SimpleStreamExample.run();
+        ActorStreamInteropExample.run();
     }
 }
