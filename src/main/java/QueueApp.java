@@ -1,8 +1,11 @@
-import examples.ActorStreamInteropExample;
-import examples.SimpleStreamMeasurementExample;
+import examples.WebSocketStreamExample;
 
 public class QueueApp {
-    public static void main(String[] args) throws Exception {
-        ActorStreamInteropExample.run();
+    public static void main(String[] args) {
+        try {
+            WebSocketStreamExample.run();
+        } catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
+        }
     }
 }
