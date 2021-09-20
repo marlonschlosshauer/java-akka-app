@@ -1,4 +1,4 @@
-import examples.WebSocketStreamExample;
+import example_3.WebSocketStreamExample;
 
 public class QueueApp {
     public static void main(String[] args) {
