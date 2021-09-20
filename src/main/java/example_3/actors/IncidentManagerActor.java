@@ -11,7 +11,6 @@ import example_3.models.base.Incident;
 import example_3.models.messages.IncidentManagerMessage;
 import example_3.models.messages.IncidentMessage;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class IncidentManagerActor extends AbstractBehavior<IncidentManagerMessage> {

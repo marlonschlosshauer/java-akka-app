@@ -1,6 +1,5 @@
 package example_3.models.messages;
 
-import akka.actor.typed.ActorRef;
 import example_3.models.base.Incident;
 
 public interface IncidentMessage {

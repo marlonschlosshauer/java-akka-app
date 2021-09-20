@@ -9,28 +9,22 @@ import akka.http.javadsl.model.ws.Message;
 import akka.http.javadsl.model.ws.TextMessage;
 import akka.http.javadsl.server.Route;
 import akka.stream.javadsl.Flow;
-import akka.util.Timeout;
-import com.google.gson.Gson;
 import akka.stream.typed.javadsl.ActorFlow;
-
-import example_3.actors.IncidentActor;
+import com.google.gson.Gson;
 import example_3.actors.IncidentManagerActor;
 import example_3.actors.LogActor;
 import example_3.actors.MainActor;
 import example_3.models.base.Incident;
 import example_3.models.base.Update;
 import example_3.models.messages.IncidentManagerMessage;
-import example_3.models.messages.IncidentMessage;
 import example_3.models.messages.LogMessages;
-import scala.concurrent.duration.FiniteDuration;
 
-import java.util.Arrays;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import static akka.http.javadsl.server.Directives.*;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class WebSocketStreamExample {
     private static Flow<Message, Message, NotUsed> stream (ActorSystem system) {
@@ -94,7 +88,6 @@ public class WebSocketStreamExample {
 
         try {
             System.in.read(); // let it run until user presses return
-
             binding
                     .thenCompose(ServerBinding::unbind) // trigger unbinding from the port
                     .thenAccept(unbound -> system.terminate()); // and shutdown when done
