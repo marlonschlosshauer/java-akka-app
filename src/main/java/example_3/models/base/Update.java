@@ -1,4 +1,4 @@
-package example_3.models;
+package example_3.models.base;
 
 import java.util.Arrays;
 
@@ -7,6 +7,8 @@ public class Update {
     public Position position;
     public Speed speed;
     public Incident[] incidents;
+
+    public Update() {}
 
     public Update(String car, Position position, Speed speed, Incident[] incidents) {
         this.car = car;

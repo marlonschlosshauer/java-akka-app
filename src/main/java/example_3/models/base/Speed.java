@@ -1,4 +1,4 @@
-package example_3.models;
+package example_3.models.base;
 
 public class Speed {
     public float value;

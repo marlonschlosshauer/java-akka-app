@@ -1,4 +1,4 @@
-package example_3.models;
+package example_3.models.base;
 
 public class Position {
     public long lat;
