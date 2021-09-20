@@ -14,23 +14,28 @@ import com.google.gson.Gson;
 import akka.stream.typed.javadsl.ActorFlow;
 
 import example_3.actors.IncidentActor;
+import example_3.actors.IncidentManagerActor;
 import example_3.actors.LogActor;
 import example_3.actors.MainActor;
 import example_3.models.base.Incident;
 import example_3.models.base.Update;
+import example_3.models.messages.IncidentManagerMessage;
 import example_3.models.messages.IncidentMessage;
 import example_3.models.messages.LogMessages;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Arrays;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import static akka.http.javadsl.server.Directives.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class WebSocketStreamExample {
     private static Flow<Message, Message, NotUsed> stream (ActorSystem system) {
         final ActorRef<LogMessages> logger = system.systemActorOf(LogActor.create(), "LogActor", system.systemActorOf$default$3());
-        final ActorRef<IncidentMessage> reporter = system.systemActorOf(IncidentActor.create(), "IncidentManager", system.systemActorOf$default$3());
+        final ActorRef<IncidentManagerMessage> reporter = system.systemActorOf(IncidentManagerActor.create(system), "IncidentManager", system.systemActorOf$default$3());
         final Gson translator = new Gson();
 
         Flow<Update, Update, NotUsed> log = Flow.of(Update.class).map(x -> {
@@ -51,20 +56,23 @@ public class WebSocketStreamExample {
             return result;
         });
 
-        Flow<Incident, IncidentMessage.ReportResponse, NotUsed> reportIncidents =
-                ActorFlow.ask(reporter, Duration.ofSeconds(3), (i, replyTo) -> new IncidentMessage.ReportIncident(i, replyTo));
+        Flow<Incident, IncidentManagerMessage.ReportResponse, NotUsed> reportIncidents =
+                ActorFlow.ask(reporter, Duration.ofSeconds(3), (i, replyTo) -> new IncidentManagerMessage.ReportIncident(i, replyTo));
 
-        Flow<Update, LogMessages.LogResponse, NotUsed> logUpdate =
+        Flow<List<Update>, LogMessages.LogResponse, NotUsed> logUpdate =
                 ActorFlow.ask(logger, Duration.ofSeconds(3), (update, replyTo) -> new LogMessages.Log(update, replyTo));
 
         return Flow.of(Message.class)
                 // Message -> Update
                 .via(cast)
+                // Throttle requests
+                .groupedWithin(1000, Duration.ofSeconds(1))
                 // Log Update to DB, Analytics, System Logs
                 .via(logUpdate)
                 // Unpack Response
                 .map(r -> r.update)
-                // Unfold Incidents[] -> ...Incidents
+                // Unfold Update[] -> Incidents[] -> ...Incidents
+                .mapConcat((List<Update> u) -> u)
                 .mapConcat((Update u) -> Arrays.asList(u.incidents))
                 // Handle reported Incidents
                 .via(reportIncidents)
